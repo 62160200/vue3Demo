@@ -1,95 +1,50 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-        <div class="test">
-          <div class="test-2">test</div>
-        </div>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <div>
+    <h1>PokeAPI</h1>
+    <p>
+      This is the App page. This page is using the PokeAPI to get the data of the pokemon.
+    </p>
+    <select name="pokemon" id="pokemon" v-model="selectedPokemon" @change="getPokemon">
+      <option value="" disabled>Select a pokemon</option>
+      <option
+        v-for="pokemon in pokemonList"
+        :key="pokemon.name"
+        :value="pokemon.url.split('/')[6]"
+      >
+        No.{{ pokemon.url.split("/")[6] + " " + pokemon.name }}
+      </option>
+    </select>
+  </div>
+  <OnDetails :DataPokemon="DataPokemon" v-show="showDetails" />
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import OnDetails from "./components/OnDetails.vue";
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+const pokemonList: any = ref([]);
+const selectedPokemon: any = ref("");
+const DataPokemon: any = ref([]);
+const showDetails: any = ref(false);
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
+onMounted(async () => {
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=151");
+  const data = await response.json();
+  pokemonList.value = data.results;
+});
 
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
-<style lang="scss">
-.test {
-  &-2 {
-    color: red;
-  }
+const getPokemon = () => {
+  const response = fetch(`https://pokeapi.co/api/v2/pokemon/${selectedPokemon.value}`);
+  response
+    .then((res) => res.json())
+    .then((data) => {
+      DataPokemon.value = data;
+    });
+  showDetails.value = true;
+};
+</script>
+<style scoped lang="scss">
+select {
+  text-transform: capitalize;
 }
 </style>
